@@ -41,7 +41,7 @@ Hệ thống quản lý ra vào sử dụng thẻ từ NFC (RFID), tích hợp g
 |                            | SDA                   | ESP32: **GPIO32**      | Giao tiếp I2C           |
 |                            | SCL                   | ESP32: **GPIO33**      | Giao tiếp I2C           |
 | **5. Loa / Buzzer**        |                       |                        |                         |
-| (Cảnh báo)                 | Chân (+)              | ESP32: **GPIO14**      | Kích mức cao (High)     |
+| (Cảnh báo)                 | Chân (+)              | ESP32: **GPIO14**      | Passive (PWM Signal)    |
 |                            | Chân (-)              | Mạch: **GND**          |                         |
 | **6. Nút bấm (Button)**    |                       |                        |                         |
 | (Mở cửa trong)             | Chân 1                | ESP32: **GPIO13**      | Input Pullup            |
@@ -100,7 +100,7 @@ graph TD
     Packet -->|GND| GND2[GND]
 
     %% Buzzer
-    Buzzer[Còi Chip] -->|Signal| ESP32_14[GPIO14]
+    Buzzer[Còi (Passive)] -->|PWM Signal| ESP32_14[GPIO14]
     Buzzer -->|GND| GND3[GND]
 
     %% LCD I2C

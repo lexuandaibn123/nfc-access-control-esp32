@@ -153,3 +153,106 @@ graph TD
                                                                 │
                                                               [GND]
 ```
+
+10. Luồng Hoạt động (Sequence Diagrams)
+
+### 1. Khởi động & Cấu hình (Boot Process)
+
+Luồng xử lý khi thiết bị bắt đầu cấp điện, bao gồm kết nối mạng và đồng bộ dữ liệu.
+
+```mermaid
+sequenceDiagram
+    participant Boot as BootLoader
+    participant Setup as Main Setup
+    participant Config as ConfigManager
+    participant Wifi as WiFiManager
+    participant API as Server API
+    participant Tasks as Background Tasks
+
+    Boot->>Setup: Cấp nguồn
+    Setup->>Setup: Khởi tạo LCD, Buzzer, Relay, NFC
+
+    %% Load Config
+    Setup->>Config: Load cấu hình từ Flash
+    alt Chưa có Config hoặc First Run
+        Config-->>Setup: Trả về Empty/Default
+        Setup->>Wifi: Phát Wifi AP "Esp32-Config"
+        Note right of Wifi: Người dùng kết nối vào 192.168.4.1 để cài đặt
+    else Đã có Config
+        Config-->>Setup: Trả về Wifi Creds & API URL
+    end
+
+    %% Wifi Connect
+    Setup->>Wifi: Kết nối Wifi (SSID/Pass)
+    alt Kết nối thất bại
+        Wifi-->>Setup: Fail
+        Setup->>Wifi: Chuyên về chế độ AP Config
+    else Kết nối thành công
+        Wifi-->>Setup: Success (IP Address)
+    end
+
+    %% Sync Time & API
+    Setup->>Setup: Đồng bộ giờ (NTP Server)
+    Setup->>API: POST /device/register (Device Info)
+    API-->>Setup: Trả về Device Token (Sử dụng cho Auth)
+
+    Setup->>API: GET /device/config (Sử dụng Token)
+    API-->>Setup: Trả về Cấu hình (Whitelist thẻ, Timeout cửa...)
+    Setup->>Config: Lưu/Cập nhật Whitelist vào RAM
+
+    %% Start Tasks
+    Setup->>Tasks: Khởi chạy DoorMonitoringTask (Giám sát cửa)
+    Setup->>Tasks: Khởi chạy CommandPollingTask (Nhận lệnh mở từ xa)
+    Setup->>Setup: Vào vòng lặp chính (Loop)
+```
+
+### 2. Xử lý Thẻ & Kiểm soát Ra vào (Core Access Logic)
+
+Luồng chi tiết xử lý khi người dùng quẹt thẻ, bao gồm cả 2 trường hợp Online và Offline.
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant NFC as NFC Reader
+    participant Controller as AccessController
+    participant API as Server API
+    participant Local as Local Whitelist (RAM)
+    participant Door as Relay & Cửa
+
+    User->>NFC: Quẹt thẻ
+    NFC->>Controller: Đọc UID + Dữ liệu thẻ (CardID, Credential)
+
+    alt Thẻ trắng (Chưa có ID)
+        Controller->>API: POST /cards (Tạo thẻ mới)
+        API-->>Controller: Trả về CardID mới
+        Controller->>NFC: Ghi CardID vào Sector 4
+        Controller-->>User: Bíp (Đăng ký thành công)
+    else Thẻ đã định danh
+        %% ONLINE CHECK
+        Note over Controller, API: Kiểm tra Online trước
+        Controller->>API: POST /access/check
+
+        alt Có mạng (Online Success)
+            API-->>Controller: Trả về: Kết quả (ALLOW/DENY) + Credential
+
+            opt Có Credential mới (Key Rotation)
+                Controller->>NFC: Ghi Credential mới vào thẻ (Sector 8)
+            end
+
+            Controller->>Door: Mở khoá (Nếu ALLOW)
+            Controller-->>User: Hiển thị kết quả (Welcome/Denied)
+
+        else Mất mạng (Offline/Network Error)
+            %% OFFLINE CHECK
+            Note over Controller, Local: Chuyển sang chế độ Offline
+
+            Controller->>Controller: Tự xác thực Credential (JWT Signature Verify)
+
+            Controller->>Local: Tìm CardID trong Whitelist
+            Controller->>Door: Mở khoá (Nếu có trong Whitelist)
+            Controller-->>User: Hiển thị kết quả (Offline Access/Denied)
+        end
+    end
+
+    Controller->>NFC: Halt Card (Ngắt kết nối thẻ)
+```

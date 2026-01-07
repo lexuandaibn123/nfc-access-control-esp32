@@ -100,7 +100,7 @@ graph TD
     Packet -->|GND| GND2[GND]
 
     %% Buzzer
-    Buzzer[Còi (Passive)] -->|PWM Signal| ESP32_14[GPIO14]
+    Buzzer["Còi (Passive)"] -->|PWM Signal| ESP32_14[GPIO14]
     Buzzer -->|GND| GND3[GND]
 
     %% LCD I2C

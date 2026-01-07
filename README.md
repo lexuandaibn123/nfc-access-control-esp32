@@ -88,15 +88,15 @@ graph TD
     ESP32[ESP32 Controller]
 
     %% Relay Module Connection
-    ESP32 -->|GPIO25| Relay_IN1[Relay IN1]
-    ESP32 -->|GPIO26| Relay_IN2[Relay IN2]
+    ESP32 -->|GPIO25| Relay_IN1["Relay IN1"]
+    ESP32 -->|GPIO26| Relay_IN2["Relay IN2"]
 
     %% Door Sensor
-    Sensor[Cảm biến cửa MC38] -->|Signal| ESP32_27[GPIO27]
+    Sensor["Cảm biến cửa MC38"] -->|Signal| ESP32_27[GPIO27]
     Sensor -->|GND| GND1[GND]
 
     %% Button
-    Packet[Nút bấm] -->|Signal| ESP32_13[GPIO13]
+    Packet["Nút bấm"] -->|Signal| ESP32_13[GPIO13]
     Packet -->|GND| GND2[GND]
 
     %% Buzzer
@@ -104,15 +104,15 @@ graph TD
     Buzzer -->|GND| GND3[GND]
 
     %% LCD I2C
-    ESP32 -->|GPIO32 - SDA| LCD_SDA[LCD SDA]
-    ESP32 -->|GPIO33 - SCL| LCD_SCL[LCD SCL]
+    ESP32 -->|GPIO32 - SDA| LCD_SDA["LCD SDA"]
+    ESP32 -->|GPIO33 - SCL| LCD_SCL["LCD SCL"]
 
     %% NFC
-    ESP32 -->|GPIO5| NFC_SS[NFC SDA/SS]
-    ESP32 -->|GPIO4| NFC_RST[NFC RST]
-    ESP32 -->|GPIO18| NFC_SCK[NFC SCK]
-    ESP32 -->|GPIO19| NFC_MISO[NFC MISO]
-    ESP32 -->|GPIO23| NFC_MOSI[NFC MOSI]
+    ESP32 -->|GPIO5| NFC_SS["NFC SDA/SS"]
+    ESP32 -->|GPIO4| NFC_RST["NFC RST"]
+    ESP32 -->|GPIO18| NFC_SCK["NFC SCK"]
+    ESP32 -->|GPIO19| NFC_MISO["NFC MISO"]
+    ESP32 -->|GPIO23| NFC_MOSI["NFC MOSI"]
 ```
 
 ## 9) Sơ đồ Đấu nối (Text Diagram)
@@ -123,33 +123,33 @@ graph TD
 │   (Chỉ dành cho Khóa & Relay)    │          │    (Dành cho ESP32 & Sensors)    │
 └──────────────────────────────────┘          └──────────────────────────────────┘
 
- [ Adapter 12V ]                              [ Nguồn 5V (USB hoặc Sạc 5V) ]
-    │      │                                         │
-    │(+)   └─(GND)──┐                                │(5V)
-    │               │                                ▼
-    ▼               ▼                         ┌────────────┐
-┌───────┐      ┌───────┐                      │   ESP32    │
-│ RELAY │      │ KHOÁ  │                      │ (Main MCU) │
-│(Kênh 2)      │SOLENOID                      └──┬──┬──┬───┘
-│       │      │       │                         │  │  │
-│ [COM2]◄──────┤  (+)  │                  (3.3V) │  │  │ (5V)
-│       │      │       │                    ┌────┘  │  └────┐
-│ [NO2 ]──────►│  (-)  │                    │       │       │
-└───────┘      └───────┘                    ▼       │       ▼
-   ▲                                 ┌────────────┐ │ ┌────────────┐
-   │                                 │ RFID RC522 │ │ │  LCD I2C   │
-   │ (Tín hiệu điều khiển)           │ (SPI Bus)  │ │ │ (VCC, GND) │
-   │                                 └────────────┘ │ └────────────┘
-   │                                                │
-   │                                 ┌──────────────┼──────────────┐
-   │                                 ▼              ▼              ▼
-   │      ┌────────────┐      ┌────────────┐ ┌────────────┐ ┌────────────┐
-   └─────►│ RELAY (K2) │      │  LOA CÒI   │ │  NÚT BẤM   │ │ MC38 (Cửa) │
-          │ (GPIO26)   │      │  (GPIO14)  │ │  (GPIO13)  │ │  (GPIO27)  │
-          │ [VCC, GND] │      │ [GND, I/O] │ │ [GND, I/O] │ │ [GND, I/O] │
-          └────────────┘      └────────────┘ └────────────┘ └────────────┘
-                                     │              │              │
-                                     └──────────────┴──────────────┘
-                                                    │
-                                                  [GND]
+    [ Adapter 12V ]                              [ Nguồn 5V (USB hoặc Sạc 5V) ]
+        │      │                                                 │
+        │(+)   └─(GND)──┐                                        │(5V)
+        │               │                                        ▼
+        ▼               ▼                                 ┌────────────┐
+    ┌───────┐      ┌───────┐                              │   ESP32    │
+    │ RELAY │      │ KHOÁ  │                              │ (Main MCU) │
+    │(Kênh 2)      │SOLENOID                              └──┬──┬──┬───┘
+    │       │      │       │                                 │  │  │
+    │ [COM2]◄──────┤  (+)  │                          (3.3V) │  │  │ (5V)
+    │       │      │       │                            ┌────┘  │  └────┐
+    │ [NO2 ]──────►│  (-)  │                            │       │       │
+    └───────┘      └───────┘                            ▼       │       ▼
+        ▲                                        ┌────────────┐ │ ┌────────────┐
+        │                                        │ RFID RC522 │ │ │  LCD I2C   │
+        │ (Tín hiệu điều khiển)                  │ (SPI Bus)  │ │ │ (VCC, GND) │
+        │                                        └────────────┘ │ └────────────┘
+        │                                                       │
+        │                                        ┌──────────────┼──────────────┐
+        │                                        ▼              ▼              ▼
+        │      ┌────────────┐              ┌────────────┐ ┌────────────┐ ┌────────────┐
+        └─────►│ RELAY (K2) │              │  LOA CÒI   │ │  NÚT BẤM   │ │ MC38 (Cửa) │
+               │ (GPIO26)   │              │  (GPIO14)  │ │  (GPIO13)  │ │  (GPIO27)  │
+               │ [VCC, GND] │              │ [GND, I/O] │ │ [GND, I/O] │ │ [GND, I/O] │
+               └────────────┘              └────────────┘ └────────────┘ └────────────┘
+                                                 │              │              │
+                                                 └──────────────┴──────────────┘
+                                                                │
+                                                              [GND]
 ```
